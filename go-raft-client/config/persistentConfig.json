@@ -1,0 +1,9 @@
+[
+    {
+        "ElectionTimeout": 4000,
+        "HeartbeatTimeout": 2000,
+        "ExecuteTimeout": 1000,
+        "BatchSize": 100,
+        "BatchTimeout": 200
+    }
+]
