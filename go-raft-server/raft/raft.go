@@ -185,7 +185,7 @@ func (rf *Raft) replicateOnceRound(peer int) {
 	rf.mu.RUnlock()
 	reply := new(AppendEntriesReply)
 	util.DPrintf("{Node %v} sends AppendEntriesArgs %v to {Node %v}", rf.me, args, peer)
-	if rf.sendAppendEntries(peer, args, reply) == nil {
+	if err := rf.sendAppendEntries(peer, args, reply); err == nil {
 		util.DPrintf("{Node %v} receives AppendEntriesReply %v from {Node %v}", rf.me, reply, peer)
 		rf.mu.Lock()
 		if args.Term == rf.currentTerm && rf.state == Leader {
@@ -210,6 +210,7 @@ func (rf *Raft) replicateOnceRound(peer int) {
 		}
 		rf.mu.Unlock()
 	} else {
+		util.DPrintf("%v", err)
 		rf.mu.Lock()
 		// reset offline peer's matchindex in oder to send a lot of useless logs
 		rf.nextIndex[peer] = rf.lastLogIndex + 1
