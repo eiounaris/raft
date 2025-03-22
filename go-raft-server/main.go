@@ -61,13 +61,25 @@ func main() {
 	// 注册 Command transferred
 	gob.Register([]kvraft.Command{})
 
+	// 初始化 TlsConfig
+	tlsConfig, err := util.InitTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	if err != nil {
+		panic(err)
+	}
+	for i := range peers {
+		peers[i].TlsConfig = tlsConfig
+	}
+
 	// 启动节点 Raft
 	service := raft.Make(peers, me, logdb, applyCh)
 
 	// 启动 rpc 服务
-	if _, err = util.StartRPCServer(fmt.Sprintf(":%v", peers[me].Port)); err != nil {
-		panic(fmt.Sprintf("error when start rpc service: %v\n", err))
+	if _, err := util.StartTlsRpcServer(tlsConfig, fmt.Sprintf("%v:%v", peers[me].Ip, peers[me].Port)); err != nil {
+		panic(err)
 	}
+	// if _, err = util.StartRPCServer(fmt.Sprintf(":%v", peers[me].Port)); err != nil {
+	// 	panic(fmt.Sprintf("error when start rpc service: %v\n", err))
+	// }
 
 	// 打印节点启动日志
 	log.Printf("peer Raft service started, lisening addr: %v:%v\n", peers[me].Ip, peers[me].Port)

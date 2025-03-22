@@ -66,7 +66,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) erro
 }
 
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) error {
-	return rf.peers[server].Call("Raft", "RequestVote", args, reply)
+	return rf.peers[server].TlsRpcCall("Raft", "RequestVote", args, reply)
 }
 
 // --- AppendEntries
@@ -175,7 +175,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 }
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) error {
-	return rf.peers[server].Call("Raft", "AppendEntries", args, reply)
+	return rf.peers[server].TlsRpcCall("Raft", "AppendEntries", args, reply)
 }
 
 // --- Print Args And Reply gracefully
