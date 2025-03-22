@@ -1,0 +1,5 @@
+[
+    {"id": 0, "ip": "192.168.128.100", "port": 9000, "san": "peer0.example.com"},
+    {"id": 1, "ip": "192.168.128.128", "port": 9001, "san": "peer1.example.com"},
+    {"id": 2, "ip": "192.168.128.129", "port": 9002, "san": "peer2.example.com"}
+]

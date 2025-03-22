@@ -1,3 +1,6 @@
 go-raft-server/data/
 go-raft-server/log/
 test*/
+
+go-raft-server/config/
+go-raft-server/.env/

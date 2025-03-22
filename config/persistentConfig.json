@@ -1,0 +1,11 @@
+{
+    "electionTimeout": 2000,
+    "heartbeatTimeout": 1000,
+    "executeTimeout": 1000,
+    "batchSize": 100,
+    "batchTimeout": 200,
+    "clinetConnectTimeout": 1000,
+    "certFile": "pem/peer0.cert",
+    "keyFile": "pem/peer0.key",
+    "caFile": "pem/ca.cert"
+}
