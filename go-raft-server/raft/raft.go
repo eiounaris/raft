@@ -438,7 +438,7 @@ func (rf *Raft) Start(command any) (int, int, bool) {
 	rf.persist()
 
 	rf.matchIndex[rf.me], rf.nextIndex[rf.me] = nextLogIndex, nextLogIndex+1
-	util.DPrintf("{Node %v} starts agreement on a new log entry with command %v in term %v", rf.me, command, rf.currentTerm)
+	util.DPrintf("{Node %v} starts agreement on a new log entry with command in term %v", rf.me, rf.currentTerm)
 	// then broadcast to all peers to append log entry
 	rf.BroadcastHeartbeat(false)
 	// return the new log index and term, and whether this server is the leader

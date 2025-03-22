@@ -123,14 +123,15 @@ func main() {
 						for j := range requestNums {
 							// 调用 raft 服务
 							service.Start(blockOfCommands)
-							msg := <-applyCh
-							log.Printf("client {%v} received num {%v} Raft ApplyMsg(%v)\n", i, j, msg)
+							<-applyCh
+							log.Printf("client {%v} received num {%v} Raft ApplyMsg\n", i, j)
 						}
 					}()
 				}
 				wg.Wait()
 				tEnd := time.Now()
 				fmt.Printf("TPS: %v\n", (float64(clients*len(blockOfCommands)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
+				fmt.Printf("共识内容: %v\n", blockOfCommands)
 				continue
 			}
 
@@ -150,14 +151,15 @@ func main() {
 						for j := range requestNums {
 							// 调用 raft 服务
 							service.Start(blockOfString)
-							msg := <-applyCh
-							log.Printf("client {%v} received num {%v} Raft ApplyMsg(%v)\n", i, j, msg)
+							<-applyCh
+							log.Printf("client {%v} received num {%v} Raft ApplyMsg\n", i, j)
 						}
 					}()
 				}
 				wg.Wait()
 				tEnd := time.Now()
 				fmt.Printf("TPS: %v\n", (float64(clients*len(blockOfString)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
+				fmt.Printf("共识内容: %v\n", blockOfString)
 				continue
 			}
 
