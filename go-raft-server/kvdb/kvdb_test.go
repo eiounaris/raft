@@ -1,10 +1,20 @@
 package kvdb
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestKVDB(t *testing.T) {
 
-	db, err := MakeKVDB("tmp/db")
+	dir, err := os.MkdirTemp("", "example")
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer os.RemoveAll(dir)
+
+	db, err := MakeKVDB(dir)
 	if err != nil {
 		t.Error(err)
 	}
