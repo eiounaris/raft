@@ -57,9 +57,11 @@ func main() {
 
 	// 创建节点 Raft ApplyMsg 通道
 	applyCh := make(chan raft.ApplyMsg)
-	for msg := range applyCh {
-		log.Printf("receives Raft ApplyMsg(%v)\n", msg)
-	}
+	go func() {
+		for msg := range applyCh {
+			log.Printf("receives Raft ApplyMsg(%v)\n", msg)
+		}
+	}()
 
 	// 注册 Command transferred
 	gob.Register([]kvraft.Command{})
