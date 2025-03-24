@@ -103,6 +103,7 @@ func (rf *Raft) replicator(peer int) {
 	rf.replicatorCond[peer].L.Lock()
 	defer rf.replicatorCond[peer].L.Unlock()
 	for {
+		fmt.Println()
 		for !rf.needReplicating(peer) {
 			rf.replicatorCond[peer].Wait()
 		}

@@ -57,6 +57,9 @@ func main() {
 
 	// 创建节点 Raft ApplyMsg 通道
 	applyCh := make(chan raft.ApplyMsg)
+	for msg := range applyCh {
+		log.Printf("receives Raft ApplyMsg(%v)\n", msg)
+	}
 
 	// 注册 Command transferred
 	gob.Register([]kvraft.Command{})
@@ -116,22 +119,21 @@ func main() {
 				requestNums := 100
 				wg := new(sync.WaitGroup)
 				tBegin := time.Now()
-				for i := range clients {
+				for range clients {
 					wg.Add(1)
 					go func() {
 						defer wg.Done()
-						for j := range requestNums {
+						for range requestNums {
 							// 调用 raft 服务
 							service.Start(blockOfCommands)
-							<-applyCh
-							log.Printf("client {%v} received num {%v} Raft ApplyMsg\n", i, j)
+							time.Sleep(20 * time.Millisecond)
 						}
 					}()
 				}
 				wg.Wait()
 				tEnd := time.Now()
+				fmt.Printf("consensus content is : %v\n", blockOfCommands)
 				fmt.Printf("TPS: %v\n", (float64(clients*len(blockOfCommands)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
-				fmt.Printf("共识内容: %v\n", blockOfCommands)
 				continue
 			}
 
@@ -144,29 +146,26 @@ func main() {
 				requestNums := 100
 				wg := new(sync.WaitGroup)
 				tBegin := time.Now()
-				for i := range clients {
+				for range clients {
 					wg.Add(1)
 					go func() {
 						defer wg.Done()
-						for j := range requestNums {
+						for range requestNums {
 							// 调用 raft 服务
 							service.Start(blockOfString)
-							<-applyCh
-							log.Printf("client {%v} received num {%v} Raft ApplyMsg\n", i, j)
+							time.Sleep(20 * time.Millisecond)
 						}
 					}()
 				}
 				wg.Wait()
 				tEnd := time.Now()
+				fmt.Printf("consensus content is : %v\n", blockOfString)
 				fmt.Printf("TPS: %v\n", (float64(clients*len(blockOfString)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
-				fmt.Printf("共识内容: %v\n", blockOfString)
 				continue
 			}
 
 			// 调用 raft 服务
 			service.Start(input)
-			msg := <-applyCh
-			log.Printf("client received Raft ApplyMsg(%v)\n", msg)
 		}
 	}()
 
