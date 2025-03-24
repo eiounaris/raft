@@ -62,7 +62,7 @@ func main() {
 	gob.Register([]kvraft.Command{})
 
 	// 初始化 TlsConfig
-	tlsConfig, err := util.InitTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	tlsConfig, err := util.InitClientTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
 	if err != nil {
 		panic(err)
 	}

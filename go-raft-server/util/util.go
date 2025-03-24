@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"net/rpc"
 	"os"
 	"strconv"
@@ -106,44 +105,60 @@ func RegisterRPCService(service any) error {
 	return nil
 }
 
-// === StartRPCServer
+// === InitClientTlsConfig
 
-func StartRPCServer(address string) (net.Listener, error) {
-	rpc.HandleHTTP()
-	listener, err := net.Listen("tcp", address)
-	if err != nil {
-		return nil, err
-	}
-	go http.Serve(listener, nil)
-	return listener, nil
-}
-
-// === InitTlsConfig
-
-func InitTlsConfig(certFile string, keyFile string, caFile string) (*tls.Config, error) {
+func InitClientTlsConfig(clientCertFile string, clientKeyFile string, caCertFile string) (*tls.Config, error) {
 	// 加载客户端证书和私钥
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	clientCert, err := tls.LoadX509KeyPair(clientCertFile, clientKeyFile)
 	if err != nil {
 		return nil, err
 	}
 
 	// 加载 CA 证书（验证服务端用）
-	caCert, err := os.ReadFile(caFile)
+	caCert, err := os.ReadFile(caCertFile)
 	if err != nil {
 		return nil, err
 	}
-	caPool := x509.NewCertPool()
-	if !caPool.AppendCertsFromPEM(caCert) {
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(caCert) {
 		return nil, fmt.Errorf("failed to parse CA certificate")
 	}
 
 	// 配置 TLS（双向认证）
 	tlsConfig := &tls.Config{
-		RootCAs: caPool,
+		RootCAs: certPool,
 		// 若需双向认证，添加客户端证书：
-		Certificates: []tls.Certificate{cert},
+		Certificates: []tls.Certificate{clientCert},
 		// 跳过证书的主机名验证（仅限测试）
 		// InsecureSkipVerify: true,
+	}
+	return tlsConfig, nil
+}
+
+// === InitServerTlsConfig
+
+func InitServerTlsConfig(ServerCertFile string, ServerKeyFile string, caCertFile string) (*tls.Config, error) {
+	// 加载服务端证书和私钥
+	ServerCert, err := tls.LoadX509KeyPair(ServerCertFile, ServerKeyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// 加载 CA 证书（验证客户端用）
+	caCert, err := os.ReadFile(caCertFile)
+	if err != nil {
+		return nil, err
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(caCert) {
+		return nil, fmt.Errorf("failed to parse CA certificate")
+	}
+
+	// 配置 TLS（双向认证）
+	tlsConfig := &tls.Config{
+		ClientCAs:    certPool,
+		Certificates: []tls.Certificate{ServerCert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
 	}
 	return tlsConfig, nil
 }
