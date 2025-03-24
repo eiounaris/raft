@@ -59,7 +59,7 @@ func main() {
 	applyCh := make(chan raft.ApplyMsg)
 	go func() {
 		for msg := range applyCh {
-			log.Printf("receives Raft ApplyMsg(%v)\n", msg)
+			log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
 		}
 	}()
 
