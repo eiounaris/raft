@@ -31,7 +31,7 @@ func (ck *Clerk) Delete(key []byte, version int) *CommandReply {
 func (ck *Clerk) ExecuteCommand(args *CommandArgs) *CommandReply {
 	reply := new(CommandReply)
 	for {
-		err := ck.servers[ck.leaderId].Call("KVServer", "ExecuteCommand", args, reply)
+		err := ck.servers[ck.leaderId].TlsRpcCall("KVServer", "ExecuteCommand", args, reply)
 		if err != nil || reply.Err == ErrWrongLeader || reply.Err == ErrTimeout {
 			// fmt.Printf("recive ok?: %v, reply.Err: %v from %v\n", ok, reply.Err, ck.leaderId)
 			ck.leaderId = (ck.leaderId + 1) % len(ck.servers)

@@ -225,10 +225,23 @@ func main() {
 		panic(err)
 	}
 
+	// 初始化 TlsConfig
+	tlsConfig, err := util.InitClientTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	if err != nil {
+		panic(err)
+	}
+	for i := range peers {
+		peers[i].TlsConfig = tlsConfig
+	}
+
 	kvraft.StartKVServer(peers, me, logdb, kvvdb, persistentConfig.ElectionTimeout, persistentConfig.BatchSize, persistentConfig.BatchTimeout)
 
 	// 启动 rpc 服务
-	if _, err = util.StartRPCServer(fmt.Sprintf("%v:%v", peers[me].Ip, peers[me].Port)); err != nil {
+	tlsConfig, err = util.InitServerTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := util.StartTlsRpcServer(tlsConfig, fmt.Sprintf("%v:%v", peers[me].Ip, peers[me].Port)); err != nil {
 		panic(err)
 	}
 
