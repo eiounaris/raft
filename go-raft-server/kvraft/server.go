@@ -154,6 +154,7 @@ func StartKVServer(servers []peer.Peer, me int, logdb *kvdb.KVDB, kvvdb *KVVDB, 
 	}
 
 	go kv.applier()
+
 	go kv.periodicBatchSubmit()
 
 	if err := util.RegisterRPCService(kv); err != nil {
