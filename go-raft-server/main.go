@@ -116,12 +116,12 @@ func main() {
 							Op:      kvraft.OpGet},
 					}
 				}
-				requestNums := 10000
+				requestNums := 1000
 				tBegin := time.Now()
 				for range requestNums {
 					// 调用 raft 服务
 					service.Start(blockOfCommands)
-					time.Sleep(10 * time.Millisecond)
+					time.Sleep(1 * time.Millisecond)
 				}
 				tEnd := time.Now()
 				fmt.Printf("consensus content is : %v\n", blockOfCommands)
@@ -134,12 +134,12 @@ func main() {
 				for index := range blockOfString {
 					blockOfString[index] = "testString"
 				}
-				requestNums := 10000
+				requestNums := 1000
 				tBegin := time.Now()
 				for range requestNums {
 					// 调用 raft 服务
 					service.Start(blockOfString)
-					time.Sleep(10 * time.Millisecond)
+					time.Sleep(1 * time.Millisecond)
 				}
 				tEnd := time.Now()
 				fmt.Printf("consensus content is : %v\n", blockOfString)
