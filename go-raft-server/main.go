@@ -78,6 +78,10 @@ func main() {
 	service := raft.Make(peers, me, logdb, applyCh)
 
 	// 启动 rpc 服务
+	tlsConfig, err = util.InitServerTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	if err != nil {
+		panic(err)
+	}
 	if _, err := util.StartTlsRpcServer(tlsConfig, fmt.Sprintf("%v:%v", peers[me].Ip, peers[me].Port)); err != nil {
 		panic(err)
 	}
