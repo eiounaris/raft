@@ -123,7 +123,7 @@ func main() {
 			case "get":
 				{
 					key := parts[2]
-					clients := 100
+					clients := 200
 					wg := new(sync.WaitGroup)
 					tBegin := time.Now()
 					requestNumsPerClient := 100
