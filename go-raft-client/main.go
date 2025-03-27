@@ -22,11 +22,27 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	persistentConfigPath := env.PersistentConfigPath
 
 	// 加载节点配置信息
 	peers, err := peer.LoadPeers(env.PeersPath)
 	if err != nil {
 		panic(err)
+	}
+
+	// 加载系统配置信息
+	persistentConfig, err := util.LoadPersistentConfig(persistentConfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	// 初始化 TlsConfig
+	tlsConfig, err := util.InitClientTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	if err != nil {
+		panic(err)
+	}
+	for i := range peers {
+		peers[i].TlsConfig = tlsConfig
 	}
 
 	// 启动节点 Clerk 服务
