@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"go-raft-server/kvdb"
@@ -57,11 +56,11 @@ func main() {
 
 	// 创建节点 Raft ApplyMsg 通道
 	applyCh := make(chan raft.ApplyMsg)
-	// go func() {
-	// 	for msg := range applyCh {
-	// 		log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
-	// 	}
-	// }()
+	go func() {
+		for msg := range applyCh {
+			log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
+		}
+	}()
 
 	// 注册 Command transferred
 	gob.Register([]kvraft.Command{})
@@ -117,26 +116,16 @@ func main() {
 							Op:      kvraft.OpGet},
 					}
 				}
-				clients := 10
-				requestNums := 100
-				wg := new(sync.WaitGroup)
+				requestNums := 10000
 				tBegin := time.Now()
-				for range clients {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
-						for range requestNums {
-							// 调用 raft 服务
-							service.Start(blockOfCommands)
-							msg := <-applyCh
-							log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
-						}
-					}()
+				for range requestNums {
+					// 调用 raft 服务
+					service.Start(blockOfCommands)
+					time.Sleep(10 * time.Millisecond)
 				}
-				wg.Wait()
 				tEnd := time.Now()
 				fmt.Printf("consensus content is : %v\n", blockOfCommands)
-				fmt.Printf("TPS: %v\n", (float64(clients*len(blockOfCommands)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
+				fmt.Printf("TPS: %v\n", (float64(len(blockOfCommands)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
 				continue
 			}
 
@@ -145,26 +134,16 @@ func main() {
 				for index := range blockOfString {
 					blockOfString[index] = "testString"
 				}
-				clients := 10
-				requestNums := 100
-				wg := new(sync.WaitGroup)
+				requestNums := 10000
 				tBegin := time.Now()
-				for range clients {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
-						for range requestNums {
-							// 调用 raft 服务
-							service.Start(blockOfString)
-							msg := <-applyCh
-							log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
-						}
-					}()
+				for range requestNums {
+					// 调用 raft 服务
+					service.Start(blockOfString)
+					time.Sleep(10 * time.Millisecond)
 				}
-				wg.Wait()
 				tEnd := time.Now()
 				fmt.Printf("consensus content is : %v\n", blockOfString)
-				fmt.Printf("TPS: %v\n", (float64(clients*len(blockOfString)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
+				fmt.Printf("TPS: %v\n", (float64(len(blockOfString)*requestNums))/(tEnd.Sub(tBegin).Seconds()))
 				continue
 			}
 
