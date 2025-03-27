@@ -57,11 +57,11 @@ func main() {
 
 	// 创建节点 Raft ApplyMsg 通道
 	applyCh := make(chan raft.ApplyMsg)
-	go func() {
-		for msg := range applyCh {
-			log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
-		}
-	}()
+	// go func() {
+	// 	for msg := range applyCh {
+	// 		log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
+	// 	}
+	// }()
 
 	// 注册 Command transferred
 	gob.Register([]kvraft.Command{})
@@ -128,7 +128,8 @@ func main() {
 						for range requestNums {
 							// 调用 raft 服务
 							service.Start(blockOfCommands)
-							time.Sleep(20 * time.Millisecond)
+							msg := <-applyCh
+							log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
 						}
 					}()
 				}
@@ -155,7 +156,8 @@ func main() {
 						for range requestNums {
 							// 调用 raft 服务
 							service.Start(blockOfString)
-							time.Sleep(20 * time.Millisecond)
+							msg := <-applyCh
+							log.Printf("receives Raft ApplyMsg.Index (%v)\n", msg.CommandIndex)
 						}
 					}()
 				}

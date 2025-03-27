@@ -206,6 +206,7 @@ func (rf *Raft) replicateOnceRound(peer int) {
 					rf.nextIndex[peer] = rf.matchIndex[peer] + 1
 					// advance commitIndex if possible
 					rf.advanceCommitIndexForLeader()
+					rf.replicatorCond[peer].Signal()
 				}
 			}
 		}
