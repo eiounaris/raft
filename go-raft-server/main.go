@@ -1,4 +1,3 @@
-/*
 package main
 
 import (
@@ -165,11 +164,11 @@ func main() {
 		}
 	}
 }
-*/
+
 // === Raft
 // ===
 // === KVRaft
-
+/*
 package main
 
 import (
@@ -250,3 +249,4 @@ func main() {
 	log.Printf("peer Raft and KVRaft service started, lisening addr: %v:%v\n", peers[me].Ip, peers[me].Port)
 	select {}
 }
+*/
