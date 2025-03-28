@@ -13,41 +13,42 @@ import (
 	"go-raft-server/util"
 )
 
-type bufferedCommand struct {
-	args *CommandArgs
-	ch   chan *CommandReply
-}
-
 type KVServer struct {
 	mu           sync.RWMutex
-	me           int
 	rf           *raft.Raft
 	applyCh      chan raft.ApplyMsg
 	stateMachine *KVVDB
 	notifyChs    map[int][]chan *CommandReply
 
-	buffer         []bufferedCommand
-	bufferLock     sync.Mutex
+	bufferLock      sync.Mutex
+	bufferedCommand []Command
+	bufferedChs     []chan *CommandReply
+
 	executeTimeout time.Duration
 	batchSize      int
 	batchTimeout   time.Duration
 }
 
 func (kv *KVServer) ExecuteCommand(args *CommandArgs, reply *CommandReply) error {
-	if _, ok := kv.rf.GetState(); !ok {
+	if _, isLeader := kv.rf.GetState(); !isLeader {
 		reply.Err = ErrWrongLeader
 		return nil
 	}
 	ch := make(chan *CommandReply, 1)
 	kv.bufferLock.Lock()
-	kv.buffer = append(kv.buffer, bufferedCommand{args: args, ch: ch})
-
-	if len(kv.buffer) >= kv.batchSize {
-		batch := make([]bufferedCommand, len(kv.buffer))
-		copy(batch, kv.buffer)
-		kv.buffer = kv.buffer[:0]
+	kv.bufferedCommand = append(kv.bufferedCommand, Command{args})
+	kv.bufferedChs = append(kv.bufferedChs, ch)
+	if len(kv.bufferedCommand) >= kv.batchSize {
+		// batchCommand := make([]Command, len(kv.bufferedCommand))
+		// batchChs := make([]chan *CommandReply, len(kv.bufferedChs))
+		// copy(batchCommand, kv.bufferedCommand)
+		// copy(batchChs, kv.bufferedChs)
+		batchCommand := kv.bufferedCommand
+		batchChs := kv.bufferedChs
+		kv.bufferedCommand = kv.bufferedCommand[:0]
+		kv.bufferedChs = kv.bufferedChs[:0]
 		kv.bufferLock.Unlock()
-		go kv.submitBatch(batch)
+		go kv.submitBatch(batchCommand, batchChs)
 	} else {
 		kv.bufferLock.Unlock()
 	}
@@ -61,31 +62,22 @@ func (kv *KVServer) ExecuteCommand(args *CommandArgs, reply *CommandReply) error
 	return nil
 }
 
-func (kv *KVServer) submitBatch(batch []bufferedCommand) {
-	if len(batch) == 0 {
+func (kv *KVServer) submitBatch(batchCommand []Command, batchChs []chan *CommandReply) {
+	if len(batchCommand) == 0 {
 		return
 	}
 
-	commands := make([]Command, len(batch))
-	for i, bc := range batch {
-		commands[i] = Command{&CommandArgs{Op: bc.args.Op, Key: bc.args.Key, Value: bc.args.Value, Version: bc.args.Version}}
-	}
-
-	index, _, isLeader := kv.rf.Start(commands)
+	index, _, isLeader := kv.rf.Start(batchCommand)
 	if !isLeader {
-		for _, bc := range batch {
-			bc.ch <- &CommandReply{Err: ErrWrongLeader}
+		for _, ch := range batchChs {
+			ch <- &CommandReply{Err: ErrWrongLeader}
 		}
 		return
 	}
 
 	kv.mu.Lock()
 	defer kv.mu.Unlock()
-	chs := make([]chan *CommandReply, len(batch))
-	for i, bc := range batch {
-		chs[i] = bc.ch
-	}
-	kv.notifyChs[index] = chs
+	kv.notifyChs[index] = batchChs
 }
 
 func (kv *KVServer) applyLogToStateMachine(command Command) *CommandReply {
@@ -117,11 +109,7 @@ func (kv *KVServer) applier() {
 				if currentTerm, isLeader := kv.rf.GetState(); isLeader && message.CommandTerm == currentTerm {
 					if chs, ok := kv.notifyChs[message.CommandIndex]; ok {
 						for i, ch := range chs {
-							if i < len(replies) {
-								ch <- replies[i]
-							} else {
-								ch <- &CommandReply{Err: ErrTimeout}
-							}
+							ch <- replies[i]
 						}
 					}
 				}
@@ -141,16 +129,16 @@ func StartKVServer(servers []peer.Peer, me int, logdb *kvdb.KVDB, kvvdb *KVVDB, 
 	applyCh := make(chan raft.ApplyMsg)
 
 	kv := &KVServer{
-		mu:             sync.RWMutex{},
-		me:             me,
-		rf:             raft.Make(servers, me, logdb, applyCh),
-		applyCh:        applyCh,
-		stateMachine:   kvvdb,
-		notifyChs:      make(map[int][]chan *CommandReply),
-		buffer:         make([]bufferedCommand, 0),
-		executeTimeout: time.Duration(executeTimeout) * time.Millisecond,
-		batchSize:      batchSize,
-		batchTimeout:   time.Duration(batchTimeout) * time.Millisecond,
+		mu:              sync.RWMutex{},
+		rf:              raft.Make(servers, me, logdb, applyCh),
+		applyCh:         applyCh,
+		stateMachine:    kvvdb,
+		notifyChs:       make(map[int][]chan *CommandReply),
+		bufferedCommand: make([]Command, 0),
+		bufferedChs:     make([]chan *CommandReply, 0),
+		executeTimeout:  time.Duration(executeTimeout) * time.Millisecond,
+		batchSize:       batchSize,
+		batchTimeout:    time.Duration(batchTimeout) * time.Millisecond,
 	}
 
 	go kv.applier()
@@ -167,12 +155,13 @@ func (kv *KVServer) periodicBatchSubmit() {
 	for {
 		time.Sleep(kv.batchTimeout)
 		kv.bufferLock.Lock()
-		if len(kv.buffer) > 0 {
-			batch := make([]bufferedCommand, len(kv.buffer))
-			copy(batch, kv.buffer)
-			kv.buffer = kv.buffer[:0]
+		if len(kv.bufferedCommand) > 0 {
+			batchCommand := kv.bufferedCommand
+			batchChs := kv.bufferedChs
+			kv.bufferedCommand = kv.bufferedCommand[:0]
+			kv.bufferedChs = kv.bufferedChs[:0]
 			kv.bufferLock.Unlock()
-			kv.submitBatch(batch)
+			go kv.submitBatch(batchCommand, batchChs)
 		} else {
 			kv.bufferLock.Unlock()
 		}
