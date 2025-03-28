@@ -34,46 +34,31 @@ func (kv *KVServer) ExecuteCommand(args *CommandArgs, reply *CommandReply) error
 		reply.Err = ErrWrongLeader
 		return nil
 	}
-	ch := make(chan *CommandReply, 1)
+	if args.Op == OpGet {
+		*reply = *kv.applyLogToStateMachine(Command{args})
+		return nil
+	}
 	kv.bufferLock.Lock()
 	kv.bufferedCommand = append(kv.bufferedCommand, Command{args})
-	kv.bufferedChs = append(kv.bufferedChs, ch)
 	if len(kv.bufferedCommand) >= kv.batchSize {
 		batchCommand := kv.bufferedCommand
-		batchChs := kv.bufferedChs
 		kv.bufferedCommand = kv.bufferedCommand[:0]
-		kv.bufferedChs = kv.bufferedChs[:0]
 		kv.bufferLock.Unlock()
-		go kv.submitBatch(batchCommand, batchChs)
+		go kv.submitBatch(batchCommand)
 	} else {
 		kv.bufferLock.Unlock()
 	}
 
-	select {
-	case result := <-ch:
-		reply.Value, reply.Version, reply.Err = result.Value, result.Version, result.Err
-	case <-time.After(kv.executeTimeout):
-		reply.Err = ErrTimeout
-	}
+	reply.Err = Ok
 	return nil
 }
 
-func (kv *KVServer) submitBatch(batchCommand []Command, batchChs []chan *CommandReply) {
+func (kv *KVServer) submitBatch(batchCommand []Command) {
 	if len(batchCommand) == 0 {
 		return
 	}
 
-	index, _, isLeader := kv.rf.Start(batchCommand)
-	if !isLeader {
-		for _, ch := range batchChs {
-			ch <- &CommandReply{Err: ErrWrongLeader}
-		}
-		return
-	}
-
-	kv.mu.Lock()
-	defer kv.mu.Unlock()
-	kv.notifyChs[index] = batchChs
+	kv.rf.Start(batchCommand)
 }
 
 func (kv *KVServer) applyLogToStateMachine(command Command) *CommandReply {
@@ -96,27 +81,10 @@ func (kv *KVServer) applier() {
 			kv.mu.Lock()
 			switch cmd := message.Command.(type) {
 			case []Command:
-				var replies []*CommandReply
 				for _, c := range cmd {
-					reply := kv.applyLogToStateMachine(c)
-					replies = append(replies, reply)
+					kv.applyLogToStateMachine(c)
 				}
-
-				// 获取并清理通知通道后立即释放锁
-				chs, ok := kv.notifyChs[message.CommandIndex]
-				delete(kv.notifyChs, message.CommandIndex)
 				kv.mu.Unlock()
-
-				// 发送回复时无需持有锁
-				if ok {
-					for i, ch := range chs {
-						select {
-						case ch <- replies[i]:
-						default:
-							log.Printf("Failed to send reply to channel,可能已被超时关闭")
-						}
-					}
-				}
 			default:
 				kv.mu.Unlock()
 				log.Fatalf("Unknown cmd type: %T", cmd)
@@ -145,6 +113,7 @@ func StartKVServer(servers []peer.Peer, me int, logdb *kvdb.KVDB, kvvdb *KVVDB, 
 	}
 
 	go kv.applier()
+
 	go kv.periodicBatchSubmit()
 
 	if err := util.RegisterRPCService(kv); err != nil {
@@ -156,42 +125,15 @@ func StartKVServer(servers []peer.Peer, me int, logdb *kvdb.KVDB, kvvdb *KVVDB, 
 func (kv *KVServer) periodicBatchSubmit() {
 	for {
 		time.Sleep(kv.batchTimeout)
-		kv.checkLeaderAndCleanup() // 清理不再leader状态下的等待请求
 
 		kv.bufferLock.Lock()
 		if len(kv.bufferedCommand) > 0 {
 			batchCommand := kv.bufferedCommand
-			batchChs := kv.bufferedChs
 			kv.bufferedCommand = kv.bufferedCommand[:0]
-			kv.bufferedChs = kv.bufferedChs[:0]
 			kv.bufferLock.Unlock()
-			go kv.submitBatch(batchCommand, batchChs)
+			go kv.submitBatch(batchCommand)
 		} else {
 			kv.bufferLock.Unlock()
 		}
-	}
-}
-
-// 新增清理函数
-func (kv *KVServer) checkLeaderAndCleanup() {
-	if _, isLeader := kv.rf.GetState(); !isLeader {
-		// 清理notifyChs
-		kv.mu.Lock()
-		for index, chs := range kv.notifyChs {
-			for _, ch := range chs {
-				ch <- &CommandReply{Err: ErrWrongLeader}
-			}
-			delete(kv.notifyChs, index)
-		}
-		kv.mu.Unlock()
-
-		// 清理缓冲区
-		kv.bufferLock.Lock()
-		for _, ch := range kv.bufferedChs {
-			ch <- &CommandReply{Err: ErrWrongLeader}
-		}
-		kv.bufferedCommand = kv.bufferedCommand[:0]
-		kv.bufferedChs = kv.bufferedChs[:0]
-		kv.bufferLock.Unlock()
 	}
 }
