@@ -34,10 +34,6 @@ func (kv *KVServer) ExecuteCommand(args *CommandArgs, reply *CommandReply) error
 		reply.Err = ErrWrongLeader
 		return nil
 	}
-	if args.Op == OpGet {
-		*reply = *kv.applyLogToStateMachine(Command{args})
-		return nil
-	}
 	kv.bufferLock.Lock()
 	kv.bufferedCommand = append(kv.bufferedCommand, Command{args})
 	if len(kv.bufferedCommand) >= kv.batchSize {
