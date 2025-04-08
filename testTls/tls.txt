@@ -1,0 +1,37 @@
+# 生成 CA 私钥和证书
+openssl req -x509 -newkey rsa:4096 -nodes -days 3650 \
+  -keyout ca.key -out ca.cert \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test CA/CN=ca.example.com"
+
+
+# 生成 peer0 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer0.key -out peer0.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test Server/CN=peer0.example.com" \
+  -addext "subjectAltName=DNS:peer0.example.com"
+
+openssl x509 -req -in peer0.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer0.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer0.example.com")
+
+
+# 生成 peer1 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer1.key -out peer1.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test Server/CN=peer1.example.com" \
+  -addext "subjectAltName=DNS:peer1.example.com"
+
+openssl x509 -req -in peer1.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer1.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer1.example.com")
+
+
+# 生成 peer2 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer2.key -out peer2.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test Server/CN=peer2.example.com" \
+  -addext "subjectAltName=DNS:peer2.example.com"
+
+openssl x509 -req -in peer2.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer2.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer2.example.com")
