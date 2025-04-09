@@ -1,4 +1,3 @@
-/*
 package main
 
 import (
@@ -67,7 +66,7 @@ func main() {
 	gob.Register([]kvraft.Command{})
 
 	// 初始化 TlsConfig
-	tlsConfig, err := util.InitClientTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	tlsConfig, err := util.InitClientTlsConfig(fmt.Sprintf("pem/peer%v.cert", me), fmt.Sprintf("pem/peer%v.key", me), persistentConfig.CaFile)
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +78,7 @@ func main() {
 	service := raft.Make(peers, me, logdb, applyCh)
 
 	// 启动 rpc 服务
-	tlsConfig, err = util.InitServerTlsConfig(persistentConfig.CertFile, persistentConfig.KeyFile, persistentConfig.CaFile)
+	tlsConfig, err = util.InitServerTlsConfig(fmt.Sprintf("pem/peer%v.cert", me), fmt.Sprintf("pem/peer%v.key", me), persistentConfig.CaFile)
 	if err != nil {
 		panic(err)
 	}
@@ -144,7 +143,7 @@ func main() {
 				for range requestNums {
 					// 调用 raft 服务
 					service.Start(blockOfString)
-					time.Sleep(1 * time.Millisecond)
+					time.Sleep(10 * time.Millisecond)
 				}
 				tEnd := time.Now()
 				fmt.Printf("consensus content is : %v\n", blockOfString)
@@ -165,11 +164,11 @@ func main() {
 		}
 	}
 }
-*/
+
 // === Raft
 // ===
 // === KVRaft
-
+/*
 package main
 
 import (
@@ -250,3 +249,4 @@ func main() {
 	log.Printf("peer Raft and KVRaft service started, lisening addr: %v:%v\n", peers[me].Ip, peers[me].Port)
 	select {}
 }
+*/

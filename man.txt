@@ -1,0 +1,209 @@
+# 生成 CA 私钥和证书
+openssl req -x509 -newkey rsa:4096 -nodes -days 3650 \
+  -keyout ca.key -out ca.cert \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test CA/CN=ca.example.com"
+
+
+# 生成 peer0 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer0.key -out peer0.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer0/CN=peer0.example.com" \
+  -addext "subjectAltName=DNS:peer0.example.com"
+
+openssl x509 -req -in peer0.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer0.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer0.example.com")
+
+
+# 生成 peer1 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer1.key -out peer1.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer1/CN=peer1.example.com" \
+  -addext "subjectAltName=DNS:peer1.example.com"
+
+openssl x509 -req -in peer1.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer1.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer1.example.com")
+
+
+# 生成 peer2 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer2.key -out peer2.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer2/CN=peer2.example.com" \
+  -addext "subjectAltName=DNS:peer2.example.com"
+
+openssl x509 -req -in peer2.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer2.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer2.example.com")
+
+
+# 生成 peer3 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer3.key -out peer3.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer3/CN=peer3.example.com" \
+  -addext "subjectAltName=DNS:peer1.example.com"
+
+openssl x509 -req -in peer3.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer3.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer3.example.com")
+
+
+# 生成 peer4 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer4.key -out peer4.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer4/CN=peer4.example.com" \
+  -addext "subjectAltName=DNS:peer4.example.com"
+
+openssl x509 -req -in peer4.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer4.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer4.example.com")
+
+
+# 生成 peer5 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer5.key -out peer5.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer5/CN=peer5.example.com" \
+  -addext "subjectAltName=DNS:peer5.example.com"
+
+openssl x509 -req -in peer5.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer5.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer5.example.com")
+
+
+# 生成 peer6 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer6.key -out peer6.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer6/CN=peer6.example.com" \
+  -addext "subjectAltName=DNS:peer6.example.com"
+
+openssl x509 -req -in peer6.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer6.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer6.example.com")
+
+
+# 生成 peer7 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer7.key -out peer7.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer7/CN=peer7.example.com" \
+  -addext "subjectAltName=DNS:peer7.example.com"
+
+openssl x509 -req -in peer7.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer7.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer7.example.com")
+
+
+# 生成 peer8 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer8.key -out peer8.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer8/CN=peer8.example.com" \
+  -addext "subjectAltName=DNS:peer8.example.com"
+
+openssl x509 -req -in peer8.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer8.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer8.example.com")
+
+
+# 生成 peer9 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer9.key -out peer9.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer9/CN=peer9.example.com" \
+  -addext "subjectAltName=DNS:peer9.example.com"
+
+openssl x509 -req -in peer9.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer9.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer9.example.com")
+
+
+# 生成 peer10 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer10.key -out peer10.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer10/CN=peer10.example.com" \
+  -addext "subjectAltName=DNS:peer10.example.com"
+
+openssl x509 -req -in peer10.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer10.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer10.example.com")
+
+
+# 生成 peer11 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer11.key -out peer11.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer11/CN=peer11.example.com" \
+  -addext "subjectAltName=DNS:peer11.example.com"
+
+openssl x509 -req -in peer11.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer11.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer11.example.com")
+
+
+# 生成 peer12 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer12.key -out peer12.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer12/CN=peer12.example.com" \
+  -addext "subjectAltName=DNS:peer12.example.com"
+
+openssl x509 -req -in peer12.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer12.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer12.example.com")
+
+
+# 生成 peer13 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer13.key -out peer13.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer13/CN=peer13.example.com" \
+  -addext "subjectAltName=DNS:peer13.example.com"
+
+openssl x509 -req -in peer13.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer13.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer13.example.com")
+
+
+# 生成 peer14 私钥和 CSR
+openssl req -newkey rsa:4096 -nodes \
+  -keyout peer14.key -out peer14.req \
+  -subj "/C=CN/ST=Beijing/L=Beijing/O=Test peer14/CN=peer14.example.com" \
+  -addext "subjectAltName=DNS:peer14.example.com"
+
+openssl x509 -req -in peer14.req -CA ca.cert -CAkey ca.key \
+  -CAcreateserial -out peer14.cert -days 3650 \
+  -extfile <(printf "subjectAltName=DNS:peer14.example.com")
+
+
+
+
+
+192.168.128.51 peer0.example.com
+192.168.128.51 peer1.example.com
+192.168.128.51 peer2.example.com
+192.168.128.51 peer3.example.com
+192.168.128.51 peer4.example.com
+192.168.128.51 peer5.example.com
+192.168.128.51 peer6.example.com
+192.168.128.51 peer7.example.com
+192.168.128.51 peer8.example.com
+192.168.128.51 peer9.example.com
+192.168.128.51 peer10.example.com
+192.168.128.51 peer11.example.com
+192.168.128.51 peer12.example.com
+192.168.128.51 peer13.example.com
+192.168.128.51 peer14.example.com
+
+
+
+[
+    {"id": 0, "ip": "192.168.128.51", "port": 9000, "san": "peer0.example.com"},
+    {"id": 1, "ip": "192.168.128.51", "port": 9001, "san": "peer1.example.com"},
+    {"id": 2, "ip": "192.168.128.51", "port": 9002, "san": "peer2.example.com"},
+    {"id": 3, "ip": "192.168.128.51", "port": 9003, "san": "peer3.example.com"},
+    {"id": 4, "ip": "192.168.128.51", "port": 9004, "san": "peer4.example.com"},
+    {"id": 5, "ip": "192.168.128.51", "port": 9005, "san": "peer5.example.com"},
+    {"id": 6, "ip": "192.168.128.51", "port": 9006, "san": "peer6.example.com"},
+    {"id": 7, "ip": "192.168.128.51", "port": 9007, "san": "peer7.example.com"},
+    {"id": 8, "ip": "192.168.128.51", "port": 9008, "san": "peer8.example.com"},
+    {"id": 9, "ip": "192.168.128.51", "port": 9009, "san": "peer9.example.com"},
+    {"id": 10, "ip": "192.168.128.51", "port": 9010, "san": "peer10.example.com"},
+    {"id": 11, "ip": "192.168.128.51", "port": 9011, "san": "peer11.example.com"},
+    {"id": 12, "ip": "192.168.128.51", "port": 9012, "san": "peer12.example.com"},
+    {"id": 13, "ip": "192.168.128.51", "port": 9013, "san": "peer13.example.com"},
+    {"id": 14, "ip": "192.168.128.51", "port": 9014, "san": "peer14.example.com"}
+]
