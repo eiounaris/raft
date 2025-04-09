@@ -143,7 +143,7 @@ func main() {
 				for range requestNums {
 					// 调用 raft 服务
 					service.Start(blockOfString)
-					time.Sleep(10 * time.Millisecond)
+					time.Sleep(2 * time.Millisecond)
 				}
 				tEnd := time.Now()
 				fmt.Printf("consensus content is : %v\n", blockOfString)

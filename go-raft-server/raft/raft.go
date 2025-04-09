@@ -107,8 +107,9 @@ func (rf *Raft) replicator(peer int) {
 			rf.replicatorCond[peer].Wait()
 		}
 		// send log entries to peer
-		rf.replicateOnceRound(peer)
-		rf.replicatorCond[peer].Wait()
+		if rf.replicateOnceRound(peer) {
+			rf.replicatorCond[peer].Wait()
+		}
 	}
 }
 
@@ -171,11 +172,11 @@ func (rf *Raft) ticker() {
 	}
 }
 
-func (rf *Raft) replicateOnceRound(peer int) {
+func (rf *Raft) replicateOnceRound(peer int) bool {
 	rf.mu.RLock()
 	if rf.state != Leader {
 		rf.mu.RUnlock()
-		return
+		return true
 	}
 	prevLogIndex := rf.nextIndex[peer] - 1
 
@@ -211,6 +212,7 @@ func (rf *Raft) replicateOnceRound(peer int) {
 			}
 		}
 		rf.mu.Unlock()
+		return false
 	} else {
 		util.DPrintf("%v", err)
 		rf.mu.Lock()
@@ -218,6 +220,7 @@ func (rf *Raft) replicateOnceRound(peer int) {
 		rf.nextIndex[peer] = rf.lastLogIndex + 1
 		// rf.replicatorCond[peer].Wait()
 		rf.mu.Unlock()
+		return true
 	}
 }
 
