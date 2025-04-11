@@ -207,3 +207,20 @@ openssl x509 -req -in peer14.req -CA ca.cert -CAkey ca.key \
     {"id": 13, "ip": "192.168.128.51", "port": 9013, "san": "peer13.example.com"},
     {"id": 14, "ip": "192.168.128.51", "port": 9014, "san": "peer14.example.com"}
 ]
+
+
+
+192.168.10.152 peer0.example.com
+192.168.10.154 peer1.example.com
+192.168.10.159 peer2.example.com
+192.168.10.160 peer3.example.com
+192.168.10.162 peer4.example.com
+
+
+[
+    {"id": 0, "ip": "192.168.10.152", "port": 9000, "san": "peer0.example.com"},
+    {"id": 1, "ip": "192.168.10.154", "port": 9001, "san": "peer1.example.com"},
+    {"id": 2, "ip": "192.168.10.159", "port": 9002, "san": "peer2.example.com"},
+    {"id": 3, "ip": "192.168.10.160", "port": 9003, "san": "peer3.example.com"},
+    {"id": 4, "ip": "192.168.10.162", "port": 9004, "san": "peer4.example.com"}
+]

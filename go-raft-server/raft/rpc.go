@@ -61,7 +61,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) erro
 	rf.persist()
 	rf.electionTimer.Reset(RandomElectionTimeout())
 	reply.Term, reply.VoteGranted = rf.currentTerm, true
-	util.DPrintf("{Node %v}'s state is {state %v, term %v}} after processing RequestVote,  RequestVoteArgs %v and RequestVoteReply %v ", rf.me, rf.state, rf.currentTerm, args, reply)
+	util.DPrintf("{Node %v}'s state is {state %v, term %v}} after processing RequestVote,  RequestVoteArgs %v and RequestVoteReply %v ",
+		rf.me, rf.state, rf.currentTerm, args, reply)
 	return nil
 }
 
@@ -170,7 +171,8 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.applyCond.Signal()
 	}
 	reply.Term, reply.Success = rf.currentTerm, true
-	util.DPrintf("{Node %v}'s state is {state %v, term %v} after processing AppendEntries,  AppendEntriesArgs %v and AppendEntriesReply %v ", rf.me, rf.state, rf.currentTerm, args, reply)
+	util.DPrintf("{Node %v}'s state is {state %v, term %v} after processing AppendEntries,  AppendEntriesArgs %v and AppendEntriesReply %v ",
+		rf.me, rf.state, rf.currentTerm, args, reply)
 	return nil
 }
 

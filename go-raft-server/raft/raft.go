@@ -308,6 +308,7 @@ func (rf *Raft) readPersist() {
 }
 
 // === StartElection
+
 func (rf *Raft) StartElection() {
 	rf.votedFor = rf.me
 	rf.persist()

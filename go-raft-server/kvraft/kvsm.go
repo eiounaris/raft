@@ -83,6 +83,7 @@ func (kvvdb *KVVDB) Set(key []byte, value []byte, version int) Err {
 	}
 	panic(err)
 }
+
 func (kvvdb *KVVDB) Delete(key []byte, version int) Err {
 	_, ver, err := kvvdb.Get(key)
 	switch err {
